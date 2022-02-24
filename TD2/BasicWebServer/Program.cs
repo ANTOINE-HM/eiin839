@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Reflection;
 using System.Text;
 using System.Web;
 
@@ -92,6 +93,10 @@ namespace BasicServerHTTPlistener
                     Console.WriteLine(str);
                 }
 
+
+                Console.WriteLine(request.Url.Segments[0]);
+                if (request.Url.Segments.Length >= 2) Console.WriteLine("methode : " + request.Url.Segments[1]);
+
                 //get params un url. After ? and between &
 
                 Console.WriteLine(request.Url.Query);
@@ -105,21 +110,43 @@ namespace BasicServerHTTPlistener
                 //
                 Console.WriteLine(documentContents);
 
+                string param1 = HttpUtility.ParseQueryString(request.Url.Query).Get("param1");
+                string param2 = HttpUtility.ParseQueryString(request.Url.Query).Get("param2");
+
                 // Obtain a response object.
                 HttpListenerResponse response = context.Response;
 
                 // Construct a response.
                 string responseString = "<HTML><BODY> Hello world!</BODY></HTML>";
-                byte[] buffer = System.Text.Encoding.UTF8.GetBytes(responseString);
+
+                Type type = typeof(MyMethods);
+                MethodInfo method = type.GetMethod(request.Url.Segments[1]);
+                MyMethods methods = new MyMethods();
+                string result = (string) method.Invoke(methods, new object[] { param1, param2 });
+
+                byte[] buffer = System.Text.Encoding.UTF8.GetBytes(responseString + result);
                 // Get a response stream and write the response to it.
                 response.ContentLength64 = buffer.Length;
                 System.IO.Stream output = response.OutputStream;
                 output.Write(buffer, 0, buffer.Length);
                 // You must close the output stream.
                 output.Close();
+
+                Console.WriteLine(result);
+
+
             }
             // Httplistener neither stop ... But Ctrl-C do that ...
             // listener.Stop();
         }
+    }
+}
+
+public class MyMethods
+{
+    public string MyMethod(string param1, string param2)
+    {
+        string content = "<html><body> Hello " + param1 + " et " + param2 + " </body></html>";
+        return content;
     }
 }
