@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading;
 using System.Net.Sockets;
 using System.IO;
+using System.Net;
+using System.Web;
 
 namespace Echo
 {
@@ -36,6 +38,7 @@ namespace Echo
 
     public class handleClient
     {
+        string HTTP_ROOT = "../../../www/";
         TcpClient clientSocket;
         public void startClient(TcpClient inClientSocket)
         {
@@ -54,15 +57,17 @@ namespace Echo
 
             while (true)
             {
-
                 string str = reader.ReadString();
                 Console.WriteLine(str);
-                writer.Write(str);
+                string[] request = str.Split(' ');
+                Console.WriteLine(HTTP_ROOT + request[1]);
+                string file = System.IO.File.ReadAllText(HTTP_ROOT + request[1]);
+                Console.WriteLine(file);
+                writer.Write(file);
             }
         }
 
 
 
     }
-
 }
