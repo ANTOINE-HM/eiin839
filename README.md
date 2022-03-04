@@ -2,7 +2,7 @@
 
 Des commentaires sont présents au sein du projet afin de connaître les url de tests.
 De plus, lors de l'appel à l'éxécutable, on doit récupérer l'exécutable ExecTest.
-Ainsi le filename utilisé doit être changé suivant la machine utilisée (étant donné que je suis sur Mac et utilise une VM Parallels Windows, je ne peux pas fournir un path réutilisable)
+Ainsi le filename utilisé doit être changé suivant la machine utilisée (étant donné que je suis sur Mac et utilise une VM Parallels Windows, je ne peux pas fournir un path réutilisable). D'où le path un peu spécial  -> start.FileName = @"Z:\Desktop\SOC\base_code\TD2\ExecTest\bin\Debug\ExecTest.exe";
 
 
 
