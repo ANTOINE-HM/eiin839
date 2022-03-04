@@ -5,6 +5,7 @@ using System.IO;
 using System.Net;
 using System.Reflection;
 using System.Text;
+using System.Linq;
 using System.Web;
 
 namespace BasicServerHTTPlistener
@@ -120,21 +121,28 @@ namespace BasicServerHTTPlistener
                 // Construct a response.
                 string responseString = "<HTML><BODY> Ce soir c'est match!</BODY></HTML>";
 
+               
+
                 Type type = typeof(MyMethods);
-                MethodInfo method = type.GetMethod(request.Url.Segments[1]);
-                Console.WriteLine(method.Name);
-                MyMethods methods = new MyMethods();
-                string result = (string) method.Invoke(methods, new object[] { param1, param2 });
+                var mymethods = type.GetMethods();
+                if (mymethods.Any(m => m.Name == request.Url.Segments[1])) { 
+                    MethodInfo method = type.GetMethod(request.Url.Segments[1]);
+                    Console.WriteLine(method.Name);
+                    MyMethods methods = new MyMethods();
 
-                byte[] buffer = System.Text.Encoding.UTF8.GetBytes(responseString + result);
-                // Get a response stream and write the response to it.
-                response.ContentLength64 = buffer.Length;
-                System.IO.Stream output = response.OutputStream;
-                output.Write(buffer, 0, buffer.Length);
-                // You must close the output stream.
-                output.Close();
+                    string result = (string)method.Invoke(methods, new object[] { param1, param2 });
 
-                Console.WriteLine(result);
+                    byte[] buffer = System.Text.Encoding.UTF8.GetBytes(responseString + result);
+                    // Get a response stream and write the response to it.
+                    response.ContentLength64 = buffer.Length;
+                    System.IO.Stream output = response.OutputStream;
+                    output.Write(buffer, 0, buffer.Length);
+                    // You must close the output stream.
+                    output.Close();
+
+                    Console.WriteLine(result);
+                }
+
 
 
             }
@@ -146,14 +154,16 @@ namespace BasicServerHTTPlistener
 
 public class MyMethods
 {
-    //Exercice 1
+    //Exercice 1 (Run BasicWebServerUrlParser)
+    // A appeler avec : http://localhost:8080/MyMethod?param1=OL&param2=OM
     public string MyMethod(string param1, string param2)
     {
-        string content = "<html><body> Le Classico " + param1 + " vs " + param2 + " </body></html>";
+        string content = "<html><body> L'olympico " + param1 + " vs " + param2 + " </body></html>";
         return content;
     }
 
-    //Exercice 2
+    //Exercice 2 (Run BasicWebServerUrlParser + ExecTest)
+    // A appeler avec : http://localhost:8080/CallAnExecutable?param1=OL&param2=OM
     public string CallAnExecutable(string param1, string param2)
     {
         Console.WriteLine("je suis param 1 " + param1);
