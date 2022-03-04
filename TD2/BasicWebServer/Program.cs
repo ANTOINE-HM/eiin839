@@ -7,6 +7,8 @@ using System.Reflection;
 using System.Text;
 using System.Linq;
 using System.Web;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace BasicServerHTTPlistener
 {
@@ -112,27 +114,39 @@ namespace BasicServerHTTPlistener
                 //
                 Console.WriteLine(documentContents);
 
-                string param1 = HttpUtility.ParseQueryString(request.Url.Query).Get("param1");
-                string param2 = HttpUtility.ParseQueryString(request.Url.Query).Get("param2");
+              
 
                 // Obtain a response object.
                 HttpListenerResponse response = context.Response;
 
                 // Construct a response.
-                string responseString = "<HTML><BODY> Ce soir c'est match!</BODY></HTML>";
+                //string responseString = "<HTML><BODY> Ce soir c'est match!</BODY></HTML>";
 
                
 
                 Type type = typeof(MyMethods);
                 var mymethods = type.GetMethods();
-                if (mymethods.Any(m => m.Name == request.Url.Segments[1])) { 
+                if (mymethods.Any(m => m.Name == request.Url.Segments[1])) {
+                    
                     MethodInfo method = type.GetMethod(request.Url.Segments[1]);
                     Console.WriteLine(method.Name);
                     MyMethods methods = new MyMethods();
+                    string result;
+                    string param1 = HttpUtility.ParseQueryString(request.Url.Query).Get("param1");
+                    if (HttpUtility.ParseQueryString(request.Url.Query).Count > 1)
+                    {
+                
+                        string param2 = HttpUtility.ParseQueryString(request.Url.Query).Get("param2");
+                        result = (string) method.Invoke(methods, new object[] { param1, param2 });
+                    }
+                    else
+                    {
+                        Console.Write(request.Url.Segments[1]);
+                        result = (string) method.Invoke(methods, new object[] { param1 });
+                    }
+                      
 
-                    string result = (string)method.Invoke(methods, new object[] { param1, param2 });
-
-                    byte[] buffer = System.Text.Encoding.UTF8.GetBytes(responseString + result);
+                    byte[] buffer = System.Text.Encoding.UTF8.GetBytes(result);
                     // Get a response stream and write the response to it.
                     response.ContentLength64 = buffer.Length;
                     System.IO.Stream output = response.OutputStream;
@@ -190,9 +204,27 @@ public class MyMethods
     }
 
     //Exercice 3
-    public int incr(int value)
+    //Voir le projet ClientWeb de cette même solution
+
+    public class ValueIncr
     {
+        public string message { get; set; }
+        public int value { get; set; }
+    }
+    public string incr(string param1)
+    {
+        Console.Write(param1);
+        int value = int.Parse(param1);
         value += 1;
-        return value;
+        var valueIncr = new ValueIncr
+        {
+            message = "La valeur a ete incrementee et est egale a : ",
+            value = value,
+        };
+
+        string jsonString = JsonSerializer.Serialize(valueIncr);
+        Console.WriteLine(jsonString);
+
+        return jsonString;
     }
 }
